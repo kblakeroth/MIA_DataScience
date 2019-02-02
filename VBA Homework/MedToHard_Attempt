@@ -1,0 +1,141 @@
+Attribute VB_Name = "Homework_MedtoHard_Attempt"
+'HARD (includes medium and easy)
+Sub Hard()
+'Create variables for Open and Change.  Could do for close too, but probably not necessary because if using current row, won't need stored value.
+Dim OpenPrice As Double
+Dim Change As Double
+Dim PercentChange As Double
+Dim Ticker As String
+Dim Volume As Double
+Dim InitialVolume As Double
+Dim SummaryTableRow As Integer
+Dim Lastrow As Double
+Dim LastrowAdj As Double
+
+Lastrow = Cells(Rows.Count, "A").End(xlUp).Row
+LastrowAdj = Lastrow + 1
+InitialVolume = 0
+Volume = InitialVolume
+SummaryTableRow = 2
+'--------------------------------------------------------------------------------------
+
+For i = 2 To Lastrow
+    'If Ticker in current row is not the same as the ticker in previous row,Then take open from current row
+    
+    If Cells(i, 1).Value <> Cells(i - 1, 1).Value Then
+    OpenPrice = Cells(i, 3).Value
+    
+    'Otherwise, keep the value of opening price the same
+    'Is the below needed?
+    
+    Else
+    OpenPrice = OpenPrice
+    End If
+    
+    'Process for getting the close price and change.  If current row ticker is different from next row ticker, then current row close IS the closing price for the year.
+    'Change is close less open.  Percent Change is change / open.
+        
+    If Cells(i, 1).Value <> Cells(i + 1, 1).Value Then
+    Change = Cells(i, 6).Value - OpenPrice
+    PercentChange = Change / OpenPrice
+    Ticker = Cells(i, 1).Value
+    Cells(SummaryTableRow, 12).Value = Ticker
+    Cells(SummaryTableRow, 13).Value = Change
+    Cells(SummaryTableRow, 14).Value = PercentChange
+    
+    SummaryTableRow = SummaryTableRow + 1
+    
+    
+    End If
+Next i
+
+'We can use the code from Easy again.  To do this, reset SummaryTableRow
+SummaryTableRow = 2
+For i = 3 To LastrowAdj
+'We don't need to run the first row because volume is zero, and starting at 3 will prevent printing titles to summary table given how my if test is structured.
+' See if ticker in current row matches ticker from previous row
+If Cells(i, 1).Value = Cells(i - 1, 1).Value Then
+' If ticker matches, add current day volume to stored volume total and move to next row
+    Volume = Volume + Cells(i, 7).Value
+'If ticker does NOT match,
+    'Put prior ticker in Summary Table
+    Else
+    
+        'Ticker = Cells(i - 1, 1).Value
+        'Cells(SummaryTableRow, 9).Value = Ticker
+        
+        '(Commented out because the ticker is already in there)
+        
+       
+    'Put stored total volume for prior ticker in Summary table
+    
+        Cells(SummaryTableRow, 15).Value = Volume
+        
+        'Reset Summary Table Row
+        
+        SummaryTableRow = SummaryTableRow + 1
+    
+        'Reset stored volume total to current row volume
+    
+        Volume = Cells(i, 7).Value
+    
+    End If
+    Next i
+
+'Create Variables to hold the Various Maxima
+Dim MaxIncrease As Double
+Dim MaxDecrease As Double
+Dim MaxVolume As Double
+'Create Variables to hold the Tickers associated with each maximum
+Dim MITicker As String
+Dim MDTicker As String
+Dim MVTicker As String
+'Probably not needed, but setting starting values to 0
+MaxIncrease = 0
+MaxDecrease = 0
+MaxVolume = 0
+
+
+For i = 2 To Lastrow
+'Working on Summary Table Rows.  May need to adjust for this, but for now, will assume simplicity of starting at row 2.
+    'Find Greatest  % Increase, and store its ticker
+    If Cells(i, 14).Value > MaxIncrease Then
+        MaxIncrease = Cells(i, 14).Value
+        MITicker = Cells(i, 12).Value
+    End If
+    ' Find Greatest % Decrease and store its ticker
+    If Cells(i, 14).Value < MaxDecrease Then
+        MaxDecrease = Cells(i, 14).Value
+        MDTicker = Cells(i, 12).Value
+        
+    End If
+    
+    ' Find Max Volume and store its ticker
+    
+    If Cells(i, 15).Value > MaxVolume Then
+    MaxVolume = Cells(i, 15).Value
+    MVTicker = Cells(i, 12).Value
+    
+    End If
+Next i
+
+'Print Values from Last Loop with labels and  tickers
+'Lables
+Cells(2, 17).Value = "Greatest % Increase"
+Cells(3, 17).Value = "Greatest % Decrease"
+Cells(4, 17).Value = "Maximum Volume"
+'Tickers
+Cells(2, 18).Value = MITicker
+Cells(3, 18).Value = MDTicker
+Cells(4, 18).Value = MVTicker
+'Values
+Cells(2, 19).Value = MaxIncrease
+Cells(3, 19).Value = MaxDecrease
+Cells(4, 19).Value = MaxVolume
+'Put in all Column Headings
+Cells(1, 12).Value = "Ticker"
+Cells(1, 13).Value = "Change"
+Cells(1, 14).Value = "% Change"
+Cells(1, 15).Value = "Volume"
+End Sub
+
